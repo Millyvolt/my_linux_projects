@@ -1,0 +1,5 @@
+test_gtk3_glade: test_gtk3_glade.c
+	gcc -o test_gtk3_glade test_gtk3_glade.c `pkg-config --cflags --libs gtk+-3.0`
+
+clean:
+	rm -f *.o test_gtk3_glade

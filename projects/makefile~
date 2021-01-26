@@ -1,0 +1,10 @@
+all: myhello
+
+myhello: main.o
+	gcc main.o -lstdio -o myhello
+	
+main.o: main.c
+	gcc -c main.c
+	
+clean:
+	rm -rf *o myhello

@@ -1,0 +1,54 @@
+
+#include <gtk/gtk.h>
+
+
+int count = 0;
+GtkWidget *txt;
+
+void end_program (GtkWidget *wid, gpointer ptr)
+{
+	gtk_main_quit ();
+}
+
+void count_button (GtkWidget *wid, gpointer ptr)
+{
+	char buffer[30];
+	count++;
+	sprintf (buffer, "Button pressed %d times", count);
+	gtk_label_set_text (GTK_LABEL (ptr), buffer);
+}
+
+void copy_text (GtkWidget *wid, gpointer ptr)
+{
+	const char *input = gtk_entry_get_text (GTK_ENTRY (txt));
+	gtk_label_set_text (GTK_LABEL (ptr), input);
+}
+
+
+int main(int argc, char *argv[])
+{
+	gtk_init(&argc, &argv);
+	
+	GtkWidget *win = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	GtkWidget *grid = gtk_grid_new();
+	GtkWidget *btn = gtk_button_new_with_label ("Close window");
+	GtkWidget *btn2 = gtk_button_new_with_label ("Copy button");
+	GtkWidget *lbl = gtk_label_new ("My label");
+	
+	g_signal_connect (btn, "clicked", G_CALLBACK (end_program), NULL);
+	g_signal_connect (btn2, "clicked", G_CALLBACK (copy_text), lbl);
+	g_signal_connect (win, "delete_event", G_CALLBACK (end_program), NULL);
+
+	txt = gtk_entry_new ();
+	
+	gtk_grid_attach((GtkGrid*)grid, btn, 0, 1, 1, 1);
+	gtk_grid_attach((GtkGrid*)grid, btn2, 1, 1, 1, 1);
+	gtk_grid_attach((GtkGrid*)grid, lbl, 0, 2, 1, 1);
+	gtk_grid_attach((GtkGrid*)grid, txt, 1, 2, 1, 1);	
+	gtk_container_add (GTK_CONTAINER (win), grid);
+	gtk_widget_show_all (win);
+
+	gtk_main();
+
+	return 0;
+}      
