@@ -1,0 +1,42 @@
+
+Bash Keyboard Shortcuts
+Ctrl + C	exit launched execute app
+Ctrl + A	Go to the beginning of the selected line.
+Ctrl + E	Go to the end of the selected line.
+Ctrl + K	Cut the part of the selected line after the cursor and copy it to the clipboard.
+Arrow Up	Previously used command.
+Alt + B	Move the cursor back one word.
+Alt + F	Move the cursor forward one word.
+Ctrl + L	Clean the current screen.
+Ctrl + J	Enter the Newline control character.
+Ctrl + R	Search in your Bash history.
+Ctrl + G	Exit the history searching mode.
+
+General Linux Shortcuts
+Ctrl + Q	Quit the application in focus.
+Ctrl + Alt + F1 to F6	Switch to a virtual console.
+Ctrl + Alt + F7	Switch to the first graphical terminal.
+
+Ctrl + Alt + arrow keys    windows positioning
+Alt + F2	Open a floating command prompt.
+Ctrl + Alt + D	Minimize all windows to show desktop.
+Ctrl + Alt + Del	Shutdown options
+Ctrl + Alt + T	Launch Terminal
+F11	Toggle Fullscreen
+Alt + Tab	Cycle between running applications
+Shift + Alt + Tab	Cycle between running applications in the opposite direction
+Shift + Esc	Open the Task Manager
+
+Alt + Space	open window menu
+
+
+
+CHROMIUM
+F5 		Reload the current page.
+Ctrl + P	Print the current page.
+Ctrl + S	Save the current page.
+Ctrl + F	Find text on the current page.
+Ctrl + K	Bring the search bar into focus.
+Ctrl + W	Close the current tab.
+Ctrl + N	Open a new window.
+Ctrl + T	Open a new tab.
