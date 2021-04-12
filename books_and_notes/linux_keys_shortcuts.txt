@@ -13,7 +13,7 @@ Ctrl + R	Search in your Bash history.
 Ctrl + G	Exit the history searching mode.
 
 General Linux Shortcuts
-Ctrl + Q	Quit the application in focus.
+Ctrl + Q (Alt + F4)	Quit the application in focus (not terminal or command prompt)
 Ctrl + Alt + F1 to F6	Switch to a virtual console.
 Ctrl + Alt + F7	Switch to the first graphical terminal.
 

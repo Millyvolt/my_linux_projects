@@ -1,20 +1,24 @@
 
-gcc test_gtk.c -o test_gtk3 `pkg-config --cflags --libs gtk+-3.0`
+	gcc test_gtk.c -o test_gtk3 `pkg-config --cflags --libs gtk+-3.0`
 
-zaq123edc
+	zaq123edc
 
 APP SEARCH
-sudo apt-cache search pdf viewer
+	sudo apt-cache search pdf viewer
 
 COPY-PASTE IN TERMINAL
-Use Ctrl+Insert or Ctrl+Shift+C for copying and Shift+Insert or Ctrl+Shift+V
+	Use Ctrl+Insert or Ctrl+Shift+C for copying and Shift+Insert or Ctrl+Shift+V
 
 CREATE SYMLINK (symbolic link or shortcut to file) in Linux
-Terminal way (the link will appear in the folder the terminal points to):
-ln -s /folderorfile/link/will/point/to /name/of/the/link
-Desktop way: just hold Shift+Ctrl and drag the file or folder you want
-to link to to the location where you want the shortcut.
+	Terminal way (the link will appear in the folder the terminal points to):
+	ln -s /folderorfile/link/will/point/to /name/of/the/link
+	Desktop way: just hold Shift+Ctrl and drag the file or folder you want
+	to link to to the location where you want the shortcut.
 
+
+FILE ACCESS (if you can't delete file, for example)
+	sudo chown pi /var/www/html
+	sudo chgrp pi /var/www/html
 
 
 
@@ -53,9 +57,8 @@ Switching back to HDMI:
 
 
 
+РЕШЕНИЕ ПРОБЛЕМЫ С РАСКЛАДКОЙ КЛАВИАТУРЫ
 
-
-	Решение проблемы с раскладкой клавиатуры.
 Открываем Файловый менеджер и жмем Ctrl+H чтобы увидеть скрытые файлы.
 По умолчанию он откроется в папке /home/pi.
 Идем в папку .config -> lxpanel -> LXDE-pi -> panels и открываем файл panel
