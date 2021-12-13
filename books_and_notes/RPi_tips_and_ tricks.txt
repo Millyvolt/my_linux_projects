@@ -21,6 +21,45 @@ FILE ACCESS (if you can't delete file, for example)
 	sudo chgrp pi /var/www/html
 
 
+The following example shows how to determine if an editor has been defined, and how to set up vi as the default.
+
+	$ which $EDITOR
+	$ 
+	$ EDITOR=vi
+	$ export EDITOR
+
+
+LAUNCH SCRYPT AFTER REBOOT
+	(using only nano editor! If opens in another editor use "$ EDITOR=nano && export EDITOR" command )
+	$ crontab -e
+	Add this to cron file:
+		@reboot /home/pi/Desktop/simple_server.sh >> /home/pi/Desktop/cron_simple_server_log.txt 2>&1
+	Add delay to scrypt (sleep 20) to give a time for boot all required system services
+
+
+USEFUL COMMANDS:
+	ps -ef		Shows all current processes with timings
+	ls -al		View all files and folders with permissions
+
+
+GIT REMEMBER CREDENTIALS
+	$ git config [--global --unset] credential.helper store
+	$ git push http://example.com/repo.git
+	Username: <type your username>
+	Password: <type your password>
+
+	[several days later]
+	$ git push http://example.com/repo.git
+	[your credentials are used automatically]
+	
+	Флаги: --global  помещает логин и пароль в home директорию вместо директории проекта;
+	       --unset   отменяет запоминание логина и пароля.
+
+
+
+
+
+
 
 
 LCD TO RPI CONNECTING STEPS

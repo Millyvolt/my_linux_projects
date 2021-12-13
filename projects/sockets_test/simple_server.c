@@ -1,8 +1,4 @@
 
-/*
-** server.c -- a stream socket server demo
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -19,12 +15,26 @@
 #include <fcntl.h>
 // #include <sys/stat.h>
 
+char* itoa(int value, char* result, int base);
+
 
 #define PORT "3490"  // the port users will be connecting to
-
 #define BACKLOG 10	 // how many pending connections queue will hold
-
 #define MAXDATASIZE	200
+
+
+#define UART_PACKET_LEN      	16
+#define THP_DATA_PACKET_LEN     12
+#define HEADER_PACKET_LEN       4
+#define UART_PACKET_START       ':'
+#define PACKET_ID_POS      		1
+#define LEN_POS          		2
+#define DATA_POS        		3
+#define HUM_POS	        		7
+#define PRES_POS        		11
+#define CRC_POS          		15
+#define THP_DATA        		1
+
 
 void sigchld_handler(int s)
 {
@@ -51,6 +61,8 @@ void *get_in_addr(struct sockaddr *sa)
 
 int main(void)
 {
+	// sleep(20);
+	
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
 	struct addrinfo hints, *servinfo, *p;
 	struct sockaddr_storage their_addr; // connector's address information
@@ -126,10 +138,7 @@ int main(void)
 	while(1) {  // main accept() loop
 		sin_size = sizeof their_addr;
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-		if (new_fd == -1) {
-			perror("accept");
-			continue;
-		}
+		if (new_fd == -1) { perror("accept"); continue; }
 
 		inet_ntop(their_addr.ss_family,
 			get_in_addr((struct sockaddr *)&their_addr),
@@ -139,47 +148,127 @@ int main(void)
 		if (!fork()) { // this is the child process
 			close(sockfd); // child doesn't need the listener
 
-			if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) {
-				perror("recv");
-				exit(1);
-			}
+			//data exchange
+			while(1) {
+				if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, MSG_DONTWAIT)) == -1) { perror("recv"); }
+				else {
+					//raw data output
+					// char buf_tmp[10] = {0}, res_buf_tmp[100] = {0};
+					// itoa(*(int32_t*)&buf[DATA_POS], buf_tmp, 10);
+					// printf("t:%s \n",buf_tmp);
+					// memset(buf_tmp, 0, sizeof(buf_tmp));
 
-			if (send(new_fd, "Hello, world!", 13, 0) == -1)
-				perror("send");
-				
-			buf[numbytes] = '\0';
-			printf("client: received '%s'\n",buf);
-			if(!strcmp(buf, data_esp32)){
-				char* path = "/var/www/html/esp32data.txt";	//"/home/pi/Documents/esp32data.txt";
-				/* The permissions for the new file. */
-				mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH;
+					// for(uint8_t i = 0; i < numbytes; i++) {
+					// 	itoa(buf[i], buf_tmp, 10);
+					// 	strcat(buf_tmp, " ");
+					// 	strcat(res_buf_tmp, buf_tmp);
+					// 	memset(buf_tmp, 0, sizeof(buf_tmp));
+					// }
+					// printf("received: '%s'\n",res_buf_tmp);
 
-				/* Create the file. */
-				int fd = open (path, O_RDWR | O_CREAT | O_TRUNC, mode);
-				if (fd == -1) {		/* An error occurred. Print an error message and bail.*/
-					perror ("open");
-					return 1;
+					char *pbuf = memchr(buf, UART_PACKET_START, numbytes), tmpbuf2[200], tmpbuf[200] = "<?php echo date(\"H:i:s\"); ?>", *path;
+					if(numbytes - (pbuf - buf) >= UART_PACKET_LEN) {
+						int32_t tmpr = *(int32_t*)&pbuf[DATA_POS], hym = *(int32_t*)&pbuf[HUM_POS];
+						uint32_t pres = *(uint32_t*)&pbuf[PRES_POS];
+						sprintf(tmpbuf2, "\ttemperature: %d.%02dC, humidity: %d.%02d%%, pressure: %d.%06dmm rt st\n", tmpr/100, tmpr%100,	\
+							hym/1024, hym%1024/10, pres*3/102400, pres*3%102400);
+
+						// strcat(tmpbuf, "<?php echo date(\"H:i:s\"); ?>");
+						strcat(tmpbuf, tmpbuf2);
+
+						path = "/var/www/html/esp32data.php";
+						mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH;	/* The permissions for the new file. */
+						int fd = open (path, O_RDWR | O_CREAT | O_TRUNC, mode);		/* Create the file. */
+						if (fd == -1) { perror ("open file"); /* return 1; */}
+						
+						//need to error cheking here and repeat writing
+						write(fd, tmpbuf, strlen(tmpbuf));
+
+						close(fd);
+					}
 				}
 
-				uint8_t cnt = 20;
-				while(cnt--)
-				{
-					write(fd, buf, strlen(buf));
-					//strcat(buf, "hi");
-					sleep(1);
-				}
+				// printf("temperature: %d, humidity: %d, pressure: %d",*(int32_t*)&buf[DATA_POS], \
+				// 		*(int32_t*)&buf[HUM_POS], *(uint32_t*)&buf[PRES_POS]);
 
-				close(fd);
+				if (send(new_fd, "check alive ESP32", 17, 0) == -1) { perror("send"); break;  /*break while and reaccept connection*/}
+
+				// char buf_tmp[10] = {0}, res_buf_tmp[100] = {0};
+
+				// for(uint8_t i = 0; i < numbytes; i++) {
+				// 	itoa(buf[i], buf_tmp, 10);
+				// 	strcat(buf_tmp, " ");
+				// 	strcat(res_buf_tmp, buf_tmp);
+				// 	memset(buf_tmp, 0, sizeof(buf_tmp));
+				// }
+				// printf("received: '%s'\n",res_buf_tmp);
+
+				// itoa(*(int32_t*)&buf[DATA_POS], buf_tmp, 10);
+				// printf("t:%s \n",buf_tmp);
+				// memset(buf_tmp, 0, sizeof(buf_tmp));
+
+				// buf[numbytes] = '\0';
+				// // parcing received data, do some actions
+				// if(!strcmp(buf, data_esp32)) {
+				// 	char* path = "/var/www/html/esp32data.txt";	//"/home/pi/Documents/esp32data.txt";
+				// 	mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH;	/* The permissions for the new file. */
+				// 	int fd = open (path, O_RDWR | O_CREAT | O_TRUNC, mode);		/* Create the file. */
+				// 	if (fd == -1) {		/* An error occurred. Print an error message and bail.*/
+				// 		perror ("open file");
+				// 		// return 1;
+				// 	}
+
+				// 	uint8_t cnt = 2;
+				// 	while(cnt--) {
+				// 		write(fd, buf, strlen(buf));
+				// 		//strcat(buf, "hi");
+				// 		// sleep(1);
+				// 	}
+
+				// 	close(fd);
+				// }
+
+				sleep(1);
 			}
-
 			close(new_fd);
-			exit(0);
+			// exit(0);		// ??
 		}
 		close(new_fd);  // parent doesn't need this
 	}
 
 	return 0;
 }
+
+
+/**
+   * C++ version 0.4 char* style "itoa":
+   * Written by Lukás Chmela
+   * Released under GPLv3.
+
+   */
+  char* itoa(int value, char* result, int base) {
+    // check that the base if valid
+    if (base < 2 || base > 36) { *result = '\0'; return result; }
+
+    char* ptr = result, *ptr1 = result, tmp_char;
+    int tmp_value;
+
+    do {
+      tmp_value = value;
+      value /= base;
+      *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
+    } while ( value );
+
+    // Apply negative sign
+    if (tmp_value < 0) *ptr++ = '-';
+    *ptr-- = '\0';
+    while(ptr1 < ptr) {
+      tmp_char = *ptr;
+      *ptr--= *ptr1;
+      *ptr1++ = tmp_char;
+    }
+    return result;
+  }
 
 
 
